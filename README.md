@@ -32,6 +32,56 @@ The emulator is composed of four main files:
   - Correct updating of registers and memory.
   - Edge cases such as overflow, branching, and error handling.
 
+### Cache Management and Memory Paging Files
+
+The processor emulator repository includes several files dedicated to simulating cache behavior and managing virtual memory. Below is an overview of these key files:
+
+#### `cache.py`
+
+This file defines the foundational `Cache` class which is used to simulate cache memory operations. It includes functionalities such as:
+
+- **Cache Initialization:**  
+  Setting up cache parameters such as the cache size, block size, and (if applicable) the associativity.
+
+- **Cache Operations:**  
+  Methods for reading and writing data to the cache, handling data placement, and managing replacement policies.
+
+- **Hit/Miss Tracking:**  
+  Basic logic to track cache hits and misses during memory accesses, which is crucial for evaluating cache performance.
+
+The `Cache` class is designed as a base class that can be extended to implement more specialized caching strategies.
+
+#### `multiLevelCache.py`
+
+This file implements a multi-level cache system to simulate the behavior of modern processors that use a hierarchical cache architecture. Key features include:
+
+- **Multiple Cache Levels:**  
+  Simulation of more than one cache level (e.g., L1 and L2) to mimic realistic memory hierarchies. The design typically allows for a faster, smaller cache at level 1 and a larger, slightly slower cache at level 2.
+
+- **Latency and Access Differentiation:**  
+  Modeling the differences in access times between the various cache levels. This helps in analyzing how the hierarchical design can impact overall system performance.
+
+- **Inter-cache Communication:**  
+  Logic to handle cache misses in a higher-level cache by checking lower-level caches, thereby improving data retrieval efficiency.
+
+This file builds upon the basic caching operations provided by `cache.py` and extends them to support a multi-level structure.
+
+#### `PageTableEntry.py`
+
+This file defines the `PageTableEntry` class, which is essential for simulating virtual memory management using a paging mechanism. The class typically provides:
+
+- **Virtual-to-Physical Mapping:**  
+  Attributes that store the virtual page number and its corresponding physical frame number. This mapping is crucial for translating virtual addresses to physical memory addresses.
+
+- **Validity and Status Flags:**  
+  A valid bit to indicate whether the page is currently in physical memory, as well as potential additional flags (e.g., dirty bit, access permissions) that help manage and optimize memory usage.
+
+- **Memory Management Support:**  
+  The structure supports advanced memory management features such as page replacement strategies and permission checks, which are integral parts of an operating system’s virtual memory system.
+
+This class allows the emulator to model the behavior of an operating system’s memory management unit (MMU), making it possible to simulate paging and other related memory operations.
+
+
 ## Features
 
 - **Instruction Simulation**  
