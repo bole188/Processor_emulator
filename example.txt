@@ -1,15 +1,25 @@
 MOVI r2 30
 MOVI r3 40
 MOVI r0 10111
-MOVI [0xfff3ffff23] 45
-MOV r3 [0xfff3ffff23]
+MOVI [0xffffffff] 45
 MOVI r1 919191
 OR r0 r0
 AND r0 r3
 XOR r2 r1
 MOV r1 r0
+MOV r1 [r0]
 MOVI r1 20
 HALT
+MOVI [0xfffffdf] 41
+MOVI [0xfdffffdf] 411
+MOVI [0xfaffffdf] 412
+MOVI [0xfffffdf] 413    
+MOVI [0xffffdf] 414
+MOV r0 [0xfffffdf]
+MOV r1 [0xfdffffdf]
+MOV r2 [0xfaffffdf]
+MOV r3 [0xfffffdf]
+MOV r0 [0xffffdf]
 CMP r0 11
 JE 10
 ADD r0 r2

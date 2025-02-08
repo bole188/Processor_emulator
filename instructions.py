@@ -59,34 +59,29 @@ def make_accessible(cpu,location):
     while location >= cpu.capacity:
         cpu.resize()
 
-def mov(cpu,operands):
-    if operands[0].startswith("r"):
+def mov(cpu, operands):
+    if operands[0].startswith("r"):  
         destination = int(operands[0][1:])
-        if operands[1].startswith("r"):
+        if operands[1].startswith("r"):  
             source = int(operands[1][1:])
             cpu.registers[destination] = cpu.registers[source]
-            return
-        if operands[1].startswith("p"):
+        elif operands[1].startswith("p"):  
             source_register = int(operands[1][2:-1])
-            source_value = cpu.memory[cpu.registers[source_register]]
-            cpu.registers[destination] = source_value
-            return
-        if operands[1].startswith("a"):
-            source = int(operands[1][1:-1])
-            cpu.registers[destination] = cpu.memory[source]
-            return
-    if operands[1].startswith("r"):
+            source_address = cpu.registers[source_register]
+            cpu.registers[destination] = cpu.cache.access_cache(source_address)
+        elif operands[1].startswith("a"): 
+            source_address = int(operands[1][1:-1])
+            cpu.registers[destination] = cpu.cache.access_cache(source_address)
+    elif operands[1].startswith("r"): 
         source = int(operands[1][1:])
-        if operands[0].startswith("p"):
+        if operands[0].startswith("p"): 
             destination_register = int(operands[0][2:-1])
             destination_address = cpu.registers[destination_register]
-            make_accessible(cpu,destination_address)
-            cpu.memory[destination_address] = cpu.registers[source]
-            return
-        if operands[0].startswith("a"):
-            destination = int(operands[0][1:-1])
-            cpu.memory[destination] = cpu.registers[source]
-            return
+            cpu.cache.update_cache(destination_address, cpu.registers[source])
+        elif operands[0].startswith("a"): 
+            destination_address = int(operands[0][1:-1])
+            cpu.cache.update_cache(destination_address, cpu.registers[source])
+
 
 def compare_values(cpu,left_value,right_value):
     cpu.conditional_branching = True
@@ -106,18 +101,15 @@ def cmp(cpu, operands):
         if operands[1].startswith("r"):
             right_operand = int(operands[1][1:])
             compare_values(cpu,cpu.registers[left_operand],cpu.registers[right_operand])
-            #cpu.registers[left_operand] = cpu.registers[right_operand]
             return
         if operands[1].startswith("[r"):
             source_register = int(operands[1][2:-1])
             source_value = cpu.memory[cpu.registers[source_register]]
             compare_values(cpu,cpu.registers[left_operand],source_value)
-            #cpu.registers[left_operand] = source_value
             return
         if operands[1].startswith("["):
             source = int(operands[1][1:-1])
             compare_values(cpu,cpu.registers[left_operand],cpu.memory[source])
-            #cpu.registers[left_operand] = cpu.memory[source]
             return
         else:
             source = int(operands[1][1:])
@@ -129,12 +121,10 @@ def cmp(cpu, operands):
             destination_register = int(operands[0][2:-1])
             destination_address = cpu.registers[destination_register]
             compare_values(cpu,cpu.memory[destination_address],cpu.registers[right_operand])
-            #cpu.memory[destination_address] = cpu.registers[right_operand]
             return
         if operands[0].startswith("["):
             destination = int(operands[0][1:-1])
             compare_values(cpu,cpu.memory[destination],cpu.registers[right_operand])
-            #cpu.memory[destination] = cpu.registers[right_operand]
             return
         else:
             destination = int(operands[0][1:])
@@ -148,16 +138,16 @@ def convertable_to_int(string_to_convert):
     except ValueError:
         return False
 
-def mov_immediate(cpu,operands):
+
+def mov_immediate(cpu, operands):
     if not convertable_to_int(operands[1][1:]):
         raise ValueError
     if operands[0].startswith("r"):
         register_index = int(operands[0][1:])
         cpu.registers[register_index] = int(operands[1][1:])
-        return
-    first_address = operands[0][1:-1]
-    make_accessible(cpu,first_address)
-    cpu.memory[int(first_address)] = int(operands[1][1:])
+    elif operands[0].startswith("["):
+        destination_address = int(operands[0][1:-1])
+        cpu.cache.update_cache(destination_address, int(operands[1][1:]))
 
 def bitwise_not(cpu,operand):
     left_operand = int(operand[1:])
@@ -244,13 +234,12 @@ def ior(cpu,operand):
     register_index = int(operand[0][1:])
     tuple2 = cpu.iow_called()
     if not tuple2[0] == True and not tuple2[1] == register_index:
-    #if not boolean,reg_index == True,register_index:
         raise ValueError("invalid command syntax")
     print("IOR Called. Character inside the r" + str(register_index) + " is: '" + chr(cpu.registers[register_index]) +  "'.")
     cpu.iow_flag = False,register_index
     user_input = input("Press 'c' to continue.")   
     while not user_input[0] == 'c':
-        user_input = input("Still waiting for that c.")
+        user_input = input("Still waiting for that c:")
 
 def iow(cpu,operand):
     if not operand[0].startswith("r"):
